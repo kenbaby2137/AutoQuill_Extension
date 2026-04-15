@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoQuill | Premium Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #0a0b10;
+            --bg-card: rgba(23, 25, 35, 0.7);
+            --bg-input: rgba(0, 0, 0, 0.3);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --secondary: #a855f7;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: var(--bg-body);
+            background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-body) 60%);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+        /* --- Header --- */
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+        .brand h1 { margin: 0; font-weight: 700; font-size: 2.2rem; letter-spacing: -0.02em; background: linear-gradient(to right, #fff, var(--text-dim)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand p { margin: 5px 0 0; color: var(--text-dim); font-size: 0.95rem; }
+
+        /* --- Search & Actions --- */
+        .controls { 
+            display: flex; gap: 15px; margin-bottom: 30px; 
+            background: var(--bg-card); padding: 12px; border-radius: 16px; 
+            border: 1px solid var(--border); backdrop-filter: blur(10px);
+        }
+        .search-wrapper { position: relative; flex: 1; }
+        .search-wrapper input {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 20px; color: #fff; font-size: 0.95rem; 
+            transition: var(--transition); outline: none;
+        }
+        .search-wrapper input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+
+        /* --- Profile Cards --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
+        .profile-card {
+            background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);
+            padding: 24px; backdrop-filter: blur(10px); transition: var(--transition);
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+        .profile-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .profile-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .card-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--primary); }
+        .status-badge { font-size: 0.75rem; color: var(--text-dim); background: var(--bg-input); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
+
+        /* --- Phrase Management --- */
+        .phrase-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .phrase-item { position: relative; group: hover; }
+        .phrase-item textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 40px 12px 14px; color: #fff; font-size: 0.9rem;
+            resize: vertical; min-height: 60px; outline: none; transition: var(--transition);
+        }
+        .phrase-item textarea:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
+        .btn-remove-phrase {
+            position: absolute; top: 12px; right: 12px; width: 20px; height: 20px;
+            background: rgba(239, 68, 68, 0.2); border: none; border-radius: 50%;
+            color: var(--danger); cursor: pointer; display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; transition: var(--transition);
+            opacity: 0;
+        }
+        .phrase-item:hover .btn-remove-phrase { opacity: 1; }
+        .btn-remove-phrase:hover { background: var(--danger); color: #fff; }
+
+        /* --- Buttons --- */
+        button {
+            cursor: pointer; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+            transition: var(--transition); border: 1px solid transparent;
+        }
+        .btn-primary { background: var(--primary); color: #fff; padding: 14px 24px; }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-ghost { background: var(--bg-input); color: var(--text-dim); padding: 10px 16px; border-color: var(--border); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.2); }
+        .btn-danger { color: var(--danger); padding: 8px; font-size: 0.8rem; background: transparent; }
+        .btn-danger:hover { color: #ff6b6b; }
+
+        /* --- Footer Actions --- */
+        .bottom-shelf { margin-top: 60px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .shelf-card { background: var(--bg-card); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .shelf-card h4 { margin: 0 0 20px; font-size: 1.1rem; }
+        #bulk-paste {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 12px; padding: 15px; color: var(--text-dim); font-family: monospace;
+            font-size: 0.85rem; height: 160px; outline: none; margin-bottom: 20px;
+        }
+
+        .save-indicator { position: absolute; bottom: 24px; right: 24px; font-size: 0.7rem; color: var(--success); opacity: 0; transition: var(--transition); }
+        .save-indicator.active { opacity: 1; }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .bottom-shelf { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <h1>AutoQuill Admin</h1>
+            <p>Direct phrase management with OS-level injection.</p>
+        </div>
+        <div class="actions">
+            <button class="btn-ghost" onclick="loadProfiles()">🔄 Sync Data</button>
+        </div>
+    </header>
+
+    <div class="controls">
+        <div class="search-wrapper">
+            <input type="text" id="search" placeholder="Search profiles, phrases, or tags..." oninput="renderCards()">
+        </div>
+        <button class="btn-primary" onclick="showAddModal()">+ New Profile</button>
+    </div>
+
+    <div class="grid" id="cards-container">
+        <!-- Cards injected here -->
+    </div>
+
+    <div class="bottom-shelf">
+        <div class="shelf-card">
+            <h4>📋 Bulk Import</h4>
+            <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 15px;">Format: <code>ProfileName|Phrase1|Phrase2|...</code> (one profile per line)</p>
+            <textarea id="bulk-paste" placeholder="Depin001|Hello World|WAGMI!"></textarea>
+            <button class="btn-primary" onclick="bulkUpsert()" style="width: 100%">Import All Profiles</button>
+        </div>
+        <div class="shelf-card">
+            <h4>➕ Quick Add</h4>
+            <input type="text" id="new-name" placeholder="Enter profile name..." style="width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 14px; color: #fff; margin-bottom: 20px; outline: none;">
+            <button class="btn-primary" onclick="addProfile()" style="width: 100%">Create Profile</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let allProfiles = [];
+
+    async function loadProfiles() {
+        try {
+            const res = await fetch('/api/profiles');
+            allProfiles = await res.json();
+            renderCards();
+        } catch (e) { console.error('Load failed'); }
+    }
+
+    function renderCards() {
+        const query = document.getElementById('search').value.toLowerCase();
+        const container = document.getElementById('cards-container');
+        const filtered = allProfiles.filter(p => p.name.toLowerCase().includes(query) || p.content.toLowerCase().includes(query));
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-dim);">No matching profiles found.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(profile => {
+            const phrases = profile.content ? profile.content.split('[N]') : [''];
+            return `
+            <div class="profile-card" id="card-${profile.name}">
+                <div class="card-header">
+                    <h3>${profile.name}</h3>
+                    <div class="status-badge">${phrases.length} blocks</div>
+                </div>
+                
+                <div class="phrase-list" id="list-${profile.name}">
+                    ${phrases.map((p, i) => `
+                        <div class="phrase-item">
+                            <textarea oninput="scheduleSave('${profile.name}')" placeholder="Empty phrase...">${p}</textarea>
+                            <button class="btn-remove-phrase" onclick="removePhrase('${profile.name}', ${i})">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn-ghost" onclick="addPhrase('${profile.name}')" style="flex: 1">+ Add Block</button>
+                    <button class="btn-ghost" onclick="stopTyping('${profile.name}')" style="color: #f39c12; border-color: #f39c12;">🛑 Stop Typing</button>
+                    <button class="btn-danger" onclick="deleteProfile('${profile.name}')">Delete Profile</button>
+                </div>
+                
+                <div class="save-indicator" id="save-${profile.name}">Saved ✓</div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    // --- Core Logic ---
+    function scheduleSave(name) {
+        const indicator = document.getElementById(`save-${name}`);
+        indicator.textContent = 'Saving...';
+        indicator.classList.add('active');
+        
+        clearTimeout(window[`t-${name}`]);
+        window[`t-${name}`] = setTimeout(() => saveProfile(name), 1200);
+    }
+
+    async function saveProfile(name) {
+        const list = document.getElementById(`list-${name}`);
+        const inputs = list.querySelectorAll('textarea');
+        const content = Array.from(inputs).map(i => i.value.trim()).filter(v => v).join('[N]');
+        const indicator = document.getElementById(`save-${name}`);
+
+        try {
+            await fetch(`/api/profile/${encodeURIComponent(name)}`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ content })
+            });
+            indicator.textContent = 'Saved ✓';
+            const p = allProfiles.find(x => x.name === name);
+            if (p) p.content = content;
+            setTimeout(() => indicator.classList.remove('active'), 2000);
+        } catch (e) {
+            indicator.textContent = 'Error ✕';
+        }
+    }
+
+    function addPhrase(name) {
+        const list = document.getElementById(`list-${name}`);
+        const div = document.createElement('div');
+        div.className = 'phrase-item';
+        div.innerHTML = `
+            <textarea oninput="scheduleSave('${name}')" placeholder="New phrase..."></textarea>
+            <button class="btn-remove-phrase" onclick="this.parentElement.remove(); scheduleSave('${name}')">✕</button>
+        `;
+        list.appendChild(div);
+        div.querySelector('textarea').focus();
+    }
+
+    function removePhrase(name, index) {
+        const list = document.getElementById(`list-${name}`);
+        list.children[index].remove();
+        // Shift indexing for other remove buttons
+        const items = list.querySelectorAll('.phrase-item');
+        items.forEach((item, i) => {
+            item.querySelector('.btn-remove-phrase').setAttribute('onclick', `removePhrase('${name}', ${i})`);
+        });
+        scheduleSave(name);
+    }
+
+    async function stopTyping(profileName) {
+        try {
+            const res = await fetch('/api/stop-typing', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ profileName })
+            });
+            const result = await res.json();
+            if (result.success) {
+                const status = document.getElementById(`status-${profileName}`);
+                if (status) status.innerText = '🛑 Stopped';
+            }
+        } catch (e) { console.error('Stop failed'); }
+    }
+
+    async function addProfile() {
+        const nameInput = document.getElementById('new-name');
+        const name = nameInput.value.trim();
+        if (!name) return;
+        
+        await fetch('/api/profile', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name })
+        });
+        nameInput.value = '';
+        loadProfiles();
+    }
+
+    async function deleteProfile(name) {
+        if(!confirm(`Permanently delete profile ${name}?`)) return;
+        // Hủy bỏ bộ đếm lưu tự động ngay lập tức
+        clearTimeout(window[`t-${name}`]);
+        await fetch(`/api/profile/${encodeURIComponent(name)}`, { method: 'DELETE' });
+        loadProfiles();
+    }
+
+    async function bulkUpsert() {
+        const text = document.getElementById('bulk-paste').value;
+        if (!text) return;
+        await fetch('/api/bulk-upsert', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ text })
+        });
+        document.getElementById('bulk-paste').value = '';
+        loadProfiles();
+    }
+
+    // Init
+    loadProfiles();
+</script>
+</body>
+</html>
